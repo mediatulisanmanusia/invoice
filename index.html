@@ -88,8 +88,8 @@
             transition: 0.2s;
         }
         [contenteditable="true"]:focus {
-            background-color: #e2e8f0;
-            border-bottom: 1px dashed #1e293b;
+            background-color: #fef9c3;
+            border-bottom: 1px dashed #ca8a04;
         }
         .editable-num { font-weight: 700; color: #1e293b; }
 
@@ -277,6 +277,15 @@
         .btn-gmail { background: #ea4335; }
         .btn:hover { opacity: 0.9; }
 
+        .warning-text { background: #fef2f2; color: #b91c1c; padding: 12px; border-radius: 8px; font-size: 12.5px; line-height: 1.5; font-weight: 600; text-align: center; margin-top: 15px; }
+
+        /* Mode cetak khusus */
+        .pdf-mode {
+            width: 1122px !important;
+            height: 793px !important;
+            max-width: none !important;
+        }
+
         @media print {
             @page { size: landscape; margin: 0; }
             body { background: white; padding: 0; margin: 0; }
@@ -453,7 +462,6 @@
             totalOutput.innerText = 'Rp ' + formatRupiah(Math.round(total));
         }
 
-        // Listener saat mengetik & saat kursor keluar (blur)
         hargaInput.addEventListener('input', calculateTotal);
         diskonInput.addEventListener('input', calculateTotal);
         hargaInput.addEventListener('blur', function() {
@@ -503,17 +511,23 @@
                 const invoice = document.getElementById('invoiceArea');
                 const invNum = document.getElementById('invNumber').innerText.replace(/\//g, '_');
                 
-                document.activeElement.blur(); // Hapus focus warna kuning
+                document.activeElement.blur(); // Hapus focus area kuning
+                window.scrollTo(0,0); // Perbaiki scroll issue di HP
                 
+                invoice.classList.add('pdf-mode');
+
                 const opt = {
                     margin:       0,
                     filename:     'Invoice_' + invNum + '.pdf',
                     image:        { type: 'jpeg', quality: 1 },
-                    html2canvas:  { scale: 2, useCORS: true },
+                    html2canvas:  { scale: 2, useCORS: true, scrollY: 0, scrollX: 0 },
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
                 };
 
-                html2pdf().set(opt).from(invoice).save().then(() => resolve());
+                html2pdf().set(opt).from(invoice).save().then(() => {
+                    invoice.classList.remove('pdf-mode');
+                    resolve();
+                });
             });
         }
 
